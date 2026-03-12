@@ -1,0 +1,17 @@
+﻿ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+ Current Netlify User Ôöé
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+[32mName: [39m  victor viana
+[32mEmail: [39m vianavictorv@gmail.com
+[32mGitHub: [39mvictorvianaverbo
+[32mTeams: [39m
+  [32m- [39mViana Midias
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+ Netlify Project Info  Ôöé
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+[32mCurrent project: [39membaixadores-medsimple
+[32mNetlify TOML: [39m   C:\Users\Victor\Desktop\Projetos\framework-v20\embaixadores-medsimple\netlify.toml
+[32mAdmin URL: [39m      https://app.netlify.com/projects/embaixadores-medsimple
+[32mProject URL: [39m    https://curriculomedsimple.com.br
+[32mProject Id: [39m     aa0930b9-05b9-4034-80ab-a7a726372238
+

@@ -14,6 +14,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@100..900&family=Caveat:wght@400..700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="/seja-embaixador/style.css">
+
+    <!-- Meta Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '214459200395796');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=214459200395796&ev=PageView&noscript=1"/></noscript>
+    <!-- End Meta Pixel Code -->
 </head>
 <body>
 
@@ -311,13 +328,18 @@
                 }).catch(err => console.error('Erro Supabase:', err));
 
                 // 2. Envio para o Netlify (Redundância)
-                const netlifyRes = await fetch('/', {
+                const netlifyRes = await fetch(window.location.pathname, {
                     method: 'POST',
                     headers: { "Content-Type": "application/x-www-form-urlencoded" },
                     body: new URLSearchParams(formData).toString()
                 });
 
                 if (netlifyRes.ok) {
+                    // Disparar evento Lead no Pixel
+                    if (typeof fbq === 'function') {
+                        fbq('track', 'Lead');
+                    }
+
                     // 3. Redirecionamento para WhatsApp
                     const msg = encodeURIComponent(`Olá! Acabei de me candidatar para ser embaixador da MEDsimple.\n\nNome: ${nome}\nE-mail: ${email}`);
                     window.location.href = `https://wa.me/5548933813753?text=${msg}`;
