@@ -298,6 +298,10 @@
                 return;
             }
 
+            const submitBtn = form.querySelector('[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+
             const formData = new FormData(form);
             const fullPhone = iti.getNumber();
             formData.set('telefone', fullPhone);
@@ -305,13 +309,11 @@
             const nome = formData.get('nome');
             const email = formData.get('email');
 
-            // 1. Envio para o Supabase
             const supabaseUrl = 'https://woebteyuqzndvchruxhw.supabase.co';
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvZWJ0ZXl1cXpuZHZjaHJ1eGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTAyMDYsImV4cCI6MjA4NzM2NjIwNn0.N2KgxsYE-NEnM6dz9cjGRKY1WVXoLBW1qpoNTo0oCcs';
 
             try {
-                // Inserindo no Supabase (tabela 'embaixadores medsimple')
-                fetch(`${supabaseUrl}/rest/v1/embaixadores%20medsimple`, {
+                const res = await fetch(`${supabaseUrl}/rest/v1/embaixadores%20medsimple`, {
                     method: 'POST',
                     headers: {
                         'apikey': supabaseKey,
@@ -325,30 +327,25 @@
                         whatsapp: fullPhone,
                         origem: 'seja-embaixador'
                     })
-                }).catch(err => console.error('Erro Supabase:', err));
-
-                // 2. Envio para o Netlify (Redundância)
-                // Usando '/' explicitamente para o envio na raiz
-                const netlifyRes = await fetch('/', {
-                    method: 'POST',
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: new URLSearchParams(formData).toString()
                 });
 
-                if (netlifyRes.ok) {
-                    // Disparar evento Lead no Pixel
-                    if (typeof fbq === 'function') {
-                        fbq('track', 'Lead');
-                    }
-
-                    // 3. Redirecionamento para WhatsApp
-                    const msg = encodeURIComponent(`Olá! Acabei de me candidatar para ser embaixador da MEDsimple.\n\nNome: ${nome}\nE-mail: ${email}`);
-                    window.location.href = `https://wa.me/5548933813753?text=${msg}`;
-                } else {
-                    feedback.textContent = 'Erro ao processar. Tente novamente.';
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    console.error('Erro Supabase:', err);
+                    throw new Error('Supabase error');
                 }
+
+                if (typeof fbq === 'function') {
+                    fbq('track', 'Lead');
+                }
+
+                const msg = encodeURIComponent(`Olá! Acabei de me candidatar para ser embaixador da MEDsimple.\n\nNome: ${nome}\nE-mail: ${email}`);
+                window.location.href = `https://wa.me/5548933813753?text=${msg}`;
+
             } catch (error) {
-                feedback.textContent = 'Erro de conexão. Verifique sua rede.';
+                feedback.textContent = 'Erro ao enviar. Tente novamente.';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Quero ser o representante oficial';
             }
         });
     </script>
