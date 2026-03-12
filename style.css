@@ -514,6 +514,38 @@ body {
   letter-spacing: 0.1em;
 }
 
+/* intl-tel-input overrides para form dark */
+.cta-poster .iti {
+  width: 100%;
+}
+
+.cta-poster .iti__selected-flag {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cta-poster .iti__selected-flag:hover,
+.cta-poster .iti__selected-flag:focus {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.cta-poster .iti__selected-dial-code {
+  color: white !important;
+}
+
+.cta-poster .iti__arrow {
+  border-top-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.cta-poster .iti__arrow--up {
+  border-bottom-color: rgba(255, 255, 255, 0.6) !important;
+  border-top-color: transparent !important;
+}
+
+.cta-poster .iti__flag-container {
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+}
+
 /* CTA Final - Poster */
 .cta-poster {
   background: #0c0f1d;
