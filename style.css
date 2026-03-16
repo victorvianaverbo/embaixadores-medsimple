@@ -579,3 +579,314 @@ body {
   position: relative;
   z-index: 1;
 }
+
+/* ===== TYPEFORM OVERLAY ===== */
+.tf-overlay {
+  position: fixed;
+  inset: 0;
+  background: #0c0f1d;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.tf-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.tf-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  z-index: 10;
+}
+
+.tf-progress-fill {
+  height: 100%;
+  background: var(--color-blue-500);
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+.tf-close {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 11;
+  transition: all 0.2s;
+}
+
+.tf-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.tf-steps-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.tf-step {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.tf-step.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.tf-step.exit-up {
+  opacity: 0;
+  transform: translateY(-60px);
+}
+
+.tf-step-inner {
+  width: 100%;
+  max-width: 620px;
+}
+
+.tf-question-num {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.08em;
+}
+
+.tf-question {
+  display: block;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: var(--font-weight-bold);
+  color: white;
+  margin-bottom: 2rem;
+  line-height: 1.25;
+}
+
+.tf-input {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  font-size: clamp(1.125rem, 3vw, 1.5rem);
+  font-family: var(--default-font-family);
+  padding: 0.625rem 0;
+  outline: none;
+  transition: border-color 0.2s;
+  caret-color: var(--color-blue-accent);
+}
+
+.tf-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.tf-input:focus {
+  border-bottom-color: var(--color-blue-accent);
+}
+
+/* Phone input via intl-tel-input */
+#tf-phone-wrapper .iti {
+  width: 100%;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+  transition: border-color 0.2s;
+}
+
+#tf-phone-wrapper .iti:focus-within {
+  border-bottom-color: var(--color-blue-accent);
+}
+
+#tf-phone-wrapper .iti__country-container,
+#tf-phone-wrapper .iti__selected-country {
+  background: transparent !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-bottom: none !important;
+}
+
+#tf-phone-wrapper .iti__dial-code,
+#tf-phone-wrapper .iti__selected-dial-code {
+  color: white !important;
+}
+
+#tf-phone-wrapper .iti__arrow {
+  border-top-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+#tf-phone-wrapper .iti__arrow--up {
+  border-bottom-color: rgba(255, 255, 255, 0.45) !important;
+  border-top-color: transparent !important;
+}
+
+#tf-phone-wrapper .tf-phone-input {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: clamp(1.125rem, 3vw, 1.5rem);
+  font-family: var(--default-font-family);
+  padding: 0.625rem 0 0.625rem 0.75rem;
+  outline: none;
+  width: 100%;
+  caret-color: var(--color-blue-accent);
+}
+
+#tf-phone-wrapper .tf-phone-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.tf-btn-ok {
+  margin-top: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-blue-500);
+  color: white;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  font-family: var(--default-font-family);
+}
+
+.tf-btn-ok:hover {
+  background: var(--color-blue-600);
+  transform: translateY(-1px);
+}
+
+.tf-hint {
+  margin-top: 0.625rem;
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.tf-hint strong {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.tf-error {
+  min-height: 1.25rem;
+  margin-top: 0.5rem;
+  font-size: var(--text-sm);
+  color: #f87171;
+}
+
+.tf-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.tf-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  padding: 0.875rem 1.25rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-base);
+  font-family: var(--default-font-family);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.tf-option:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--color-blue-500);
+  color: white;
+}
+
+.tf-opt-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.5);
+  transition: all 0.15s;
+}
+
+.tf-option:hover .tf-opt-key {
+  background: var(--color-blue-500);
+  border-color: var(--color-blue-500);
+  color: white;
+}
+
+.tf-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tf-back-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: color 0.2s;
+  font-family: var(--default-font-family);
+}
+
+.tf-back-btn:hover {
+  color: white;
+}
+
+.tf-counter {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.tf-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid rgba(255, 255, 255, 0.12);
+  border-top-color: var(--color-blue-500);
+  border-radius: 50%;
+  animation: tf-spin 0.7s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes tf-spin {
+  to { transform: rotate(360deg); }
+}
