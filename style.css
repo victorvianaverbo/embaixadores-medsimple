@@ -662,6 +662,9 @@ body {
 .tf-step.active {
   opacity: 1;
   transform: translateY(0);
+}
+
+.tf-overlay.open .tf-step.active {
   pointer-events: all;
 }
 
