@@ -500,7 +500,7 @@
             }
 
             if (typeof fbq === 'function') fbq('track', 'Lead');
-            const msg = encodeURIComponent(`Olá! Acabei de me candidatar para ser afiliado da MEDsimple.\n\nNome: ${tfAnswers.nome}\nE-mail: ${tfAnswers.email}\nTipo: ${tfAnswers.tipo_afiliado}`);
+            const msg = encodeURIComponent(`Olá! Acabei de me candidatar para ser afiliado da MEDsimple.\n\nNome: ${tfAnswers.nome}\nE-mail: ${tfAnswers.email}\nFaculdade: ${tfAnswers.faculdade}\nAssinante MEDsimple: ${tfAnswers.assinante}\nEstudante de Medicina: ${tfAnswers.estudante}\nTipo: ${tfAnswers.tipo_afiliado}`);
             window.location.href = `https://wa.me/5548933813753?text=${msg}`;
         }
 
