@@ -340,12 +340,14 @@
             apikey: SUPABASE_KEY,
             Authorization: `Bearer ${SUPABASE_KEY}`,
             'Content-Type': 'application/json',
-            Prefer: 'return=minimal'
+            Prefer: 'return=representation'
           },
           body: JSON.stringify({ chamado: value })
         }
       );
-      return res.ok;
+      if (!res.ok) return false;
+      const data = await res.json();
+      return Array.isArray(data) && data.length > 0;
     }
 
     // ── HELPERS ───────────────────────────────────────────────
@@ -410,7 +412,7 @@
       return `
         <div class="toggle-wrap">
           <label class="toggle" id="tog-${lead.id}">
-            <input type="checkbox" ${checked} onchange="handleToggle(${lead.id}, this)">
+            <input type="checkbox" ${checked} onchange="handleToggle('${lead.id}', this)">
             <div class="toggle-track"></div>
             <div class="toggle-thumb"></div>
           </label>
