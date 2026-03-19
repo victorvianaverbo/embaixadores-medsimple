@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SDR — MEDsimple</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f1f5f9;
+      color: #171717;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.875rem 1.25rem;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      gap: 1rem;
+    }
+    .dash-header h1 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .dash-header h1 span {
+      font-weight: 400;
+      color: #737373;
+      font-size: 0.875rem;
+      margin-left: 0.5rem;
+    }
+    .btn-refresh {
+      padding: 0.375rem 0.875rem;
+      border-radius: 0.5rem;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .btn-refresh:hover { background: #f9fafb; }
+    .btn-refresh:disabled { opacity: 0.5; cursor: default; }
+
+    /* ── STATS ── */
+    .stats-bar {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      flex-wrap: wrap;
+    }
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: #374151;
+    }
+    .stat-chip.total  { background: #eff6ff; color: #1d4ed8; }
+    .stat-chip.ok     { background: #d1fae5; color: #065f46; }
+    .stat-chip.pendente { background: #fef3c7; color: #92400e; }
+
+    /* ── FILTERS ── */
+    .filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 0.375rem 1rem;
+      border-radius: 9999px;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover { background: #f9fafb; }
+    .filter-btn.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+
+    /* ── LOADING / EMPTY / ERROR ── */
+    .state-msg {
+      text-align: center;
+      padding: 4rem 1.5rem;
+      color: #737373;
+      font-size: 0.9375rem;
+    }
+    .state-msg.error { color: #dc2626; }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: capitalize;
+      white-space: nowrap;
+    }
+    .badge-embaixador   { background: #ede9fe; color: #7c3aed; }
+    .badge-influencer   { background: #fce7f3; color: #be185d; }
+    .badge-liga         { background: #d1fae5; color: #065f46; }
+    .badge-atletica     { background: #fff7ed; color: #c2410c; }
+    .badge-profissional { background: #dbeafe; color: #1d4ed8; }
+    .badge-default      { background: #f3f4f6; color: #374151; }
+
+    /* ── WHATSAPP BUTTON ── */
+    .btn-wa {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3125rem;
+      background: #25d366;
+      color: #fff;
+      padding: 0.3125rem 0.75rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .btn-wa:hover { background: #1db954; }
+
+    /* ── TOGGLE ── */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.4375rem;
+    }
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 2.5rem;
+      height: 1.375rem;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: #d1d5db;
+      border-radius: 9999px;
+      transition: background 0.2s;
+    }
+    .toggle input:checked + .toggle-track { background: #10b981; }
+    .toggle-thumb {
+      position: absolute;
+      top: 0.1875rem;
+      left: 0.1875rem;
+      width: 1rem;
+      height: 1rem;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(1.125rem); }
+    .toggle.saving .toggle-track { opacity: 0.4; }
+    .toggle-lbl {
+      font-size: 0.8125rem;
+      color: #737373;
+      white-space: nowrap;
+    }
+    .toggle-lbl.lbl-ok { color: #059669; font-weight: 600; }
+
+    /* ── TABLE (desktop) ── */
+    .table-wrap {
+      overflow-x: auto;
+      background: #fff;
+      border-radius: 0.75rem;
+      margin: 1rem 1.25rem;
+      border: 1px solid #e5e7eb;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    thead th {
+      text-align: left;
+      padding: 0.625rem 1rem;
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: 700;
+      color: #6b7280;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid #f3f4f6; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover td { background: #fafafa; }
+    tbody td { padding: 0.75rem 1rem; vertical-align: middle; }
+    tbody tr.row-chamado td { opacity: 0.45; }
+    tbody tr.row-chamado .lead-name { text-decoration: line-through; }
+
+    .lead-name { font-weight: 600; }
+    .lead-email { font-size: 0.75rem; color: #737373; margin-top: 0.125rem; }
+    .lead-date { font-size: 0.75rem; color: #9ca3af; white-space: nowrap; }
+
+    /* ── MOBILE CARDS ── */
+    .cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+    }
+    .lead-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      transition: opacity 0.2s;
+    }
+    .lead-card.card-chamado { opacity: 0.45; }
+    .lead-card.card-chamado .lead-name { text-decoration: line-through; }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .card-info { flex: 1; min-width: 0; }
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+    .card-meta span { white-space: nowrap; }
+    .card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #f3f4f6;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 767px) {
+      .table-wrap { display: none; }
+    }
+    @media (min-width: 768px) {
+      .cards-list { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="dash-header">
+    <h1>Leads MEDsimple <span id="lead-count"></span></h1>
+    <button class="btn-refresh" id="btn-refresh">↻ Atualizar</button>
+  </header>
+
+  <div class="stats-bar" id="stats-bar" style="display:none">
+    <span class="stat-chip total"  id="stat-total"></span>
+    <span class="stat-chip ok"     id="stat-chamados"></span>
+    <span class="stat-chip pendente" id="stat-pendentes"></span>
+  </div>
+
+  <div class="filter-bar" id="filter-bar" style="display:none">
+    <button class="filter-btn active" data-filter="all">Todos</button>
+    <button class="filter-btn" data-filter="nao_chamado">Não chamados</button>
+    <button class="filter-btn" data-filter="chamado">Chamados</button>
+  </div>
+
+  <div id="state-msg" class="state-msg">Carregando leads...</div>
+
+  <!-- TABLE (desktop) -->
+  <div class="table-wrap" id="table-wrap" style="display:none">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome / E-mail</th>
+          <th>WhatsApp</th>
+          <th>Faculdade</th>
+          <th>Tipo</th>
+          <th>Assinante</th>
+          <th>Estudante</th>
+          <th>Chamado</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+      <tbody id="leads-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- CARDS (mobile) -->
+  <div class="cards-list" id="leads-cards"></div>
+
+  <script>
+    const SUPABASE_URL = 'https://woebteyuqzndvchruxhw.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvZWJ0ZXl1cXpuZHZjaHJ1eGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTAyMDYsImV4cCI6MjA4NzM2NjIwNn0.N2KgxsYE-NEnM6dz9cjGRKY1WVXoLBW1qpoNTo0oCcs';
+    const TABLE = 'embaixadores%20medsimple';
+
+    let allLeads = [];
+    let currentFilter = 'all';
+
+    // ── SUPABASE ──────────────────────────────────────────────
+    async function fetchLeads() {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/${TABLE}?select=*&order=created_at.desc`,
+        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+      );
+      if (!res.ok) throw new Error(res.status);
+      return res.json();
+    }
+
+    async function patchChamado(id, value) {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            Prefer: 'return=minimal'
+          },
+          body: JSON.stringify({ chamado: value })
+        }
+      );
+      return res.ok;
+    }
+
+    // ── HELPERS ───────────────────────────────────────────────
+    function escHtml(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function buildWaUrl(num) {
+      return `https://wa.me/${String(num || '').replace(/\D/g, '')}`;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleString('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function badgeClass(tipo) {
+      const known = ['embaixador','influencer','liga','atletica','profissional'];
+      return known.includes(tipo) ? `badge-${tipo}` : 'badge-default';
+    }
+
+    function simNao(val) {
+      return val === 'sim' ? '✓' : val === 'nao' ? '✕' : '—';
+    }
+
+    // ── FILTERS ───────────────────────────────────────────────
+    function filtered() {
+      if (currentFilter === 'chamado')     return allLeads.filter(l => l.chamado);
+      if (currentFilter === 'nao_chamado') return allLeads.filter(l => !l.chamado);
+      return allLeads;
+    }
+
+    // ── RENDER ────────────────────────────────────────────────
+    function render() {
+      const leads = filtered();
+      const total = allLeads.length;
+      const nChamados = allLeads.filter(l => l.chamado).length;
+      const nPendentes = total - nChamados;
+
+      document.getElementById('lead-count').textContent = `(${total})`;
+      document.getElementById('stat-total').textContent     = `Total: ${total}`;
+      document.getElementById('stat-chamados').textContent  = `Chamados: ${nChamados}`;
+      document.getElementById('stat-pendentes').textContent = `Pendentes: ${nPendentes}`;
+
+      renderTable(leads);
+      renderCards(leads);
+    }
+
+    function toggleHtml(lead) {
+      const checked = lead.chamado ? 'checked' : '';
+      const lbl = lead.chamado
+        ? '<span class="toggle-lbl lbl-ok">Chamado</span>'
+        : '<span class="toggle-lbl">Chamar</span>';
+      return `
+        <div class="toggle-wrap">
+          <label class="toggle" id="tog-${lead.id}">
+            <input type="checkbox" ${checked} onchange="handleToggle(${lead.id}, this)">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+          ${lbl}
+        </div>`;
+    }
+
+    function renderTable(leads) {
+      const tbody = document.getElementById('leads-tbody');
+      if (!leads.length) { tbody.innerHTML = ''; return; }
+      tbody.innerHTML = leads.map(l => `
+        <tr class="${l.chamado ? 'row-chamado' : ''}" data-id="${l.id}">
+          <td>
+            <div class="lead-name">${escHtml(l.nome)}</div>
+            <div class="lead-email">${escHtml(l.email)}</div>
+          </td>
+          <td>
+            ${l.whatsapp
+              ? `<a class="btn-wa" href="${buildWaUrl(l.whatsapp)}" target="_blank" rel="noopener">
+                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                   Chamar
+                 </a>`
+              : '<span style="color:#9ca3af;font-size:.75rem">—</span>'}
+          </td>
+          <td>${escHtml(l.faculdade) || '<span style="color:#9ca3af">—</span>'}</td>
+          <td><span class="badge ${badgeClass(l.tipo_afiliado)}">${escHtml(l.tipo_afiliado) || '—'}</span></td>
+          <td style="text-align:center">${simNao(l.assinante)}</td>
+          <td style="text-align:center">${simNao(l.estudante)}</td>
+          <td>${toggleHtml(l)}</td>
+          <td><span class="lead-date">${formatDate(l.created_at)}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderCards(leads) {
+      const el = document.getElementById('leads-cards');
+      if (!leads.length) { el.innerHTML = ''; return; }
+      el.innerHTML = leads.map(l => `
+        <div class="lead-card ${l.chamado ? 'card-chamado' : ''}" data-id="${l.id}">
+          <div class="card-top">
+            <div class="card-info">
+              <div class="lead-name">${escHtml(l.nome)}</div>
+              <div class="card-meta">
+                <span>${escHtml(l.email)}</span>
+                ${l.faculdade ? `<span>· ${escHtml(l.faculdade)}</span>` : ''}
+                ${l.tipo_afiliado ? `<span>· <span class="badge ${badgeClass(l.tipo_afiliado)}">${escHtml(l.tipo_afiliado)}</span></span>` : ''}
+              </div>
+              <div class="card-meta" style="margin-top:.25rem">
+                <span>Assinante: ${simNao(l.assinante)}</span>
+                <span>· Estudante: ${simNao(l.estudante)}</span>
+                <span>· ${formatDate(l.created_at)}</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-actions">
+            ${l.whatsapp
+              ? `<a class="btn-wa" href="${buildWaUrl(l.whatsapp)}" target="_blank" rel="noopener">
+                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                   Chamar no WhatsApp
+                 </a>`
+              : '<span style="color:#9ca3af;font-size:.8125rem">Sem número</span>'}
+            ${toggleHtml(l)}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ── TOGGLE HANDLER ────────────────────────────────────────
+    async function handleToggle(id, checkbox) {
+      const newVal = checkbox.checked;
+      const lead = allLeads.find(l => l.id === id);
+      if (!lead) return;
+
+      // Optimistic update
+      lead.chamado = newVal;
+      render();
+
+      // Persist
+      const togEl = document.getElementById(`tog-${id}`);
+      if (togEl) togEl.classList.add('saving');
+      const ok = await patchChamado(id, newVal);
+      if (togEl) togEl.classList.remove('saving');
+
+      if (!ok) {
+        lead.chamado = !newVal; // rollback
+        render();
+        alert('Erro ao salvar. Verifique as permissões do Supabase e tente novamente.');
+      }
+    }
+
+    // ── INIT ──────────────────────────────────────────────────
+    async function load() {
+      const stateEl  = document.getElementById('state-msg');
+      const statsEl  = document.getElementById('stats-bar');
+      const filterEl = document.getElementById('filter-bar');
+      const tableEl  = document.getElementById('table-wrap');
+      const btnRef   = document.getElementById('btn-refresh');
+
+      stateEl.className  = 'state-msg';
+      stateEl.textContent = 'Carregando leads...';
+      stateEl.style.display = '';
+      statsEl.style.display  = 'none';
+      filterEl.style.display = 'none';
+      tableEl.style.display  = 'none';
+      btnRef.disabled = true;
+
+      try {
+        allLeads = await fetchLeads();
+        stateEl.style.display = allLeads.length === 0 ? '' : 'none';
+        if (allLeads.length === 0) {
+          stateEl.textContent = 'Nenhum lead encontrado.';
+        } else {
+          statsEl.style.display  = '';
+          filterEl.style.display = '';
+          tableEl.style.display  = '';
+          render();
+        }
+      } catch (e) {
+        stateEl.className = 'state-msg error';
+        stateEl.textContent = `Erro ao carregar leads (${e.message}). Verifique as políticas RLS no Supabase.`;
+        stateEl.style.display = '';
+      } finally {
+        btnRef.disabled = false;
+      }
+    }
+
+    // ── EVENTS ────────────────────────────────────────────────
+    document.getElementById('btn-refresh').addEventListener('click', load);
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        render();
+      });
+    });
+
+    // ── START ─────────────────────────────────────────────────
+    load();
+  </script>
+</body>
+</html>
